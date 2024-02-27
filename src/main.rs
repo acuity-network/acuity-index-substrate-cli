@@ -1,3 +1,4 @@
+use byte_unit::{Byte, UnitType};
 use clap::{Parser, Subcommand};
 use hybrid_api::Index;
 
@@ -32,7 +33,10 @@ async fn main() {
         }
         Commands::SizeOnDisk => {
             let size = index.size_on_disk().await;
-            println!("Size on disk: {}", size);
+            println!(
+                "Size on disk: {}",
+                Byte::from_u64(size).get_appropriate_unit(UnitType::Binary)
+            );
         }
     }
 }
