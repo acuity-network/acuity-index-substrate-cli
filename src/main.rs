@@ -1,5 +1,5 @@
 use clap::Parser;
-use tokio_tungstenite::connect_async;
+use hybrid_api::Index;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -12,6 +12,5 @@ pub struct Args {
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
-    let (ws_stream, _) = connect_async(args.url).await.expect("Failed to connect");
-    println!("WebSocket handshake has been successfully completed");
+    let index = Index::connect(args.url).await;
 }

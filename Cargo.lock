@@ -312,6 +312,10 @@ checksum = "d897f394bad6a705d5f4104762e116a75639e470d80901eed05a860a95cb1904"
 [[package]]
 name = "hybrid-api"
 version = "0.1.0"
+dependencies = [
+ "tokio",
+ "tokio-tungstenite",
+]
 
 [[package]]
 name = "hybrid-cli"
@@ -320,7 +324,6 @@ dependencies = [
  "clap",
  "hybrid-api",
  "tokio",
- "tokio-tungstenite",
 ]
 
 [[package]]

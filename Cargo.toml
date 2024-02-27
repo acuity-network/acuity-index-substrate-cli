@@ -8,5 +8,4 @@ edition = "2021"
 [dependencies]
 clap = { version = "4.5.1", features = ["derive"] }
 tokio = { version = "1", features = ["full"] }
-tokio-tungstenite = "*"
 hybrid-api = {path = "../hybrid-api-rs"}
