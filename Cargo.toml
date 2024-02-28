@@ -12,3 +12,4 @@ clap = { version = "4.5.1", features = ["derive"] }
 tokio = { version = "1", features = ["full"] }
 hybrid-api = {path = "../hybrid-api-rs"}
 byte-unit = "5.1.4"
+subxt = "0.34.0"
