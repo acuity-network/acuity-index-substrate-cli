@@ -32,6 +32,15 @@ enum Commands {
         #[arg(short, long)]
         key: String,
     },
+    /// Query for events by variant
+    GetEventsVariant {
+        /// Key type to search for
+        #[arg(short, long)]
+        pallet_id: u8,
+        /// Key to search for
+        #[arg(short, long)]
+        variant_id: u8,
+    },
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash, ValueEnum)]
@@ -95,5 +104,14 @@ async fn main() {
             KeyType::SessionIndex => {}
             KeyType::TipHash => {}
         },
+        Commands::GetEventsVariant {
+            pallet_id,
+            variant_id,
+        } => {
+            let events = index
+                .get_events(Key::Variant(*pallet_id, *variant_id))
+                .await;
+            println!("Events: {:?}", events);
+        }
     }
 }
