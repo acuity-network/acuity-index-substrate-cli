@@ -19,8 +19,10 @@ pub struct Cli {
 enum Commands {
     /// Indexer status.
     Status,
-    /// Query how much disk space is used by the index.
+    /// Query how much disk space is used by the index
     SizeOnDisk,
+    /// Query for event variants the chain supports
+    GetVariants,
     /// Query for events with a key
     GetEvents {
         /// Key type to search for
@@ -65,6 +67,10 @@ async fn main() {
                 "Size on disk: {}",
                 Byte::from_u64(size).get_appropriate_unit(UnitType::Binary)
             );
+        }
+        Commands::GetVariants => {
+            let variants = index.get_variants().await;
+            println!("Variants: {:?}", variants);
         }
         Commands::GetEvents { key_type, key } => match key_type {
             KeyType::AccountId => {
