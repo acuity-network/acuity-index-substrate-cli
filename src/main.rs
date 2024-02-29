@@ -1,5 +1,6 @@
 use byte_unit::{Byte, UnitType};
 use clap::{Parser, Subcommand};
+use futures_util::StreamExt;
 use hybrid_api::{Bytes32, Index, Key, SubstrateKey};
 use std::str::FromStr;
 use subxt::utils::AccountId32;
@@ -25,6 +26,11 @@ enum Commands {
     GetVariants,
     /// Query for events with a key
     GetEvents {
+        #[command(subcommand)]
+        command: KeyCommands,
+    },
+    /// Query for events with a key
+    SubscribeEvents {
         #[command(subcommand)]
         command: KeyCommands,
     },
@@ -142,77 +148,132 @@ async fn main() {
             let variants = index.get_variants().await;
             println!("Variants: {:?}", variants);
         }
-        Commands::GetEvents { command } => match command {
-            KeyCommands::AccountId { key } => {
-                let account_id = AccountId32::from_str(key).unwrap();
-                let events = index
-                    .get_events(Key::Substrate(SubstrateKey::AccountId(Bytes32(
-                        account_id.0,
-                    ))))
-                    .await;
-                println!("Events: {:?}", events);
+        Commands::GetEvents { command } => {
+            let events = match command {
+                KeyCommands::AccountId { key } => {
+                    let account_id = AccountId32::from_str(key).unwrap();
+                    index
+                        .get_events(Key::Substrate(SubstrateKey::AccountId(Bytes32(
+                            account_id.0,
+                        ))))
+                        .await
+                }
+                KeyCommands::AccountIndex { key } => {
+                    index
+                        .get_events(Key::Substrate(SubstrateKey::AccountIndex(*key)))
+                        .await
+                }
+                KeyCommands::BountyIndex { key } => {
+                    index
+                        .get_events(Key::Substrate(SubstrateKey::BountyIndex(*key)))
+                        .await
+                }
+                KeyCommands::EraIndex { key } => {
+                    index
+                        .get_events(Key::Substrate(SubstrateKey::EraIndex(*key)))
+                        .await
+                }
+                KeyCommands::MessageId { key } => Vec::new(),
+                KeyCommands::PoolId { key } => {
+                    index
+                        .get_events(Key::Substrate(SubstrateKey::PoolId(*key)))
+                        .await
+                }
+                KeyCommands::PreimageHash { key } => Vec::new(),
+                KeyCommands::ProposalHash { key } => Vec::new(),
+                KeyCommands::ProposalIndex { key } => {
+                    index
+                        .get_events(Key::Substrate(SubstrateKey::ProposalIndex(*key)))
+                        .await
+                }
+                KeyCommands::RefIndex { key } => {
+                    index
+                        .get_events(Key::Substrate(SubstrateKey::RefIndex(*key)))
+                        .await
+                }
+                KeyCommands::RegistrarIndex { key } => {
+                    index
+                        .get_events(Key::Substrate(SubstrateKey::RegistrarIndex(*key)))
+                        .await
+                }
+                KeyCommands::SessionIndex { key } => {
+                    index
+                        .get_events(Key::Substrate(SubstrateKey::SessionIndex(*key)))
+                        .await
+                }
+                KeyCommands::TipHash { key } => Vec::new(),
+                KeyCommands::Variant {
+                    pallet_id,
+                    variant_id,
+                } => {
+                    index
+                        .get_events(Key::Variant(*pallet_id, *variant_id))
+                        .await
+                }
+            };
+            for event in events {
+                println!("{:?}", event);
             }
-            KeyCommands::AccountIndex { key } => {
-                let events = index
-                    .get_events(Key::Substrate(SubstrateKey::AccountIndex(*key)))
-                    .await;
-                println!("Events: {:?}", events);
+        }
+        Commands::SubscribeEvents { command } => {
+            let key = match command {
+                KeyCommands::AccountId { key } => {
+                    let account_id = AccountId32::from_str(key).unwrap();
+                    Key::Substrate(SubstrateKey::AccountId(Bytes32(account_id.0)))
+                }
+                KeyCommands::AccountIndex { key } => {
+                    Key::Substrate(SubstrateKey::AccountIndex(*key))
+                }
+                KeyCommands::BountyIndex { key } => Key::Substrate(SubstrateKey::BountyIndex(*key)),
+                KeyCommands::EraIndex { key } => Key::Substrate(SubstrateKey::EraIndex(*key)),
+                KeyCommands::MessageId { key } => {
+                    let message_id = hex::decode(key).unwrap();
+                    Key::Substrate(SubstrateKey::MessageId(Bytes32(
+                        message_id.try_into().unwrap(),
+                    )))
+                }
+                KeyCommands::PoolId { key } => Key::Substrate(SubstrateKey::PoolId(*key)),
+                KeyCommands::PreimageHash { key } => {
+                    let preimage_hash = hex::decode(key).unwrap();
+                    Key::Substrate(SubstrateKey::PreimageHash(Bytes32(
+                        preimage_hash.try_into().unwrap(),
+                    )))
+                }
+                KeyCommands::ProposalHash { key } => {
+                    let proposal_hash = hex::decode(key).unwrap();
+                    Key::Substrate(SubstrateKey::ProposalHash(Bytes32(
+                        proposal_hash.try_into().unwrap(),
+                    )))
+                }
+                KeyCommands::ProposalIndex { key } => {
+                    Key::Substrate(SubstrateKey::ProposalIndex(*key))
+                }
+                KeyCommands::RefIndex { key } => Key::Substrate(SubstrateKey::RefIndex(*key)),
+                KeyCommands::RegistrarIndex { key } => {
+                    Key::Substrate(SubstrateKey::RegistrarIndex(*key))
+                }
+                KeyCommands::SessionIndex { key } => {
+                    Key::Substrate(SubstrateKey::SessionIndex(*key))
+                }
+                KeyCommands::TipHash { key } => {
+                    let tip_hash = hex::decode(key).unwrap();
+                    Key::Substrate(SubstrateKey::TipHash(Bytes32(tip_hash.try_into().unwrap())))
+                }
+                KeyCommands::Variant {
+                    pallet_id,
+                    variant_id,
+                } => Key::Variant(*pallet_id, *variant_id),
+            };
+            let mut event_stream = index.subscribe_events(key).await;
+
+            while let Some(events) = event_stream.next().await {
+                for event in events {
+                    println!(
+                        "block number: {}, event index: {}",
+                        event.block_number, event.event_index
+                    );
+                }
             }
-            KeyCommands::BountyIndex { key } => {
-                let events = index
-                    .get_events(Key::Substrate(SubstrateKey::BountyIndex(*key)))
-                    .await;
-                println!("Events: {:?}", events);
-            }
-            KeyCommands::EraIndex { key } => {
-                let events = index
-                    .get_events(Key::Substrate(SubstrateKey::EraIndex(*key)))
-                    .await;
-                println!("Events: {:?}", events);
-            }
-            KeyCommands::MessageId { key } => {}
-            KeyCommands::PoolId { key } => {
-                let events = index
-                    .get_events(Key::Substrate(SubstrateKey::PoolId(*key)))
-                    .await;
-                println!("Events: {:?}", events);
-            }
-            KeyCommands::PreimageHash { key } => {}
-            KeyCommands::ProposalHash { key } => {}
-            KeyCommands::ProposalIndex { key } => {
-                let events = index
-                    .get_events(Key::Substrate(SubstrateKey::ProposalIndex(*key)))
-                    .await;
-                println!("Events: {:?}", events);
-            }
-            KeyCommands::RefIndex { key } => {
-                let events = index
-                    .get_events(Key::Substrate(SubstrateKey::RefIndex(*key)))
-                    .await;
-                println!("Events: {:?}", events);
-            }
-            KeyCommands::RegistrarIndex { key } => {
-                let events = index
-                    .get_events(Key::Substrate(SubstrateKey::RegistrarIndex(*key)))
-                    .await;
-                println!("Events: {:?}", events);
-            }
-            KeyCommands::SessionIndex { key } => {
-                let events = index
-                    .get_events(Key::Substrate(SubstrateKey::SessionIndex(*key)))
-                    .await;
-                println!("Events: {:?}", events);
-            }
-            KeyCommands::TipHash { key } => {}
-            KeyCommands::Variant {
-                pallet_id,
-                variant_id,
-            } => {
-                let events = index
-                    .get_events(Key::Variant(*pallet_id, *variant_id))
-                    .await;
-                println!("Events: {:?}", events);
-            }
-        },
+        }
     }
 }
