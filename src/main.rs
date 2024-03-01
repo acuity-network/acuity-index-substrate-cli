@@ -21,6 +21,8 @@ pub struct Cli {
 enum Commands {
     /// Indexer status.
     Status,
+    /// Subscribe to indexer status.
+    SubscribeStatus,
     /// Query how much disk space is used by the index
     SizeOnDisk,
     /// Query for event variants the chain supports
@@ -185,6 +187,16 @@ async fn main() {
             let spans = index.status().await;
             for span in spans {
                 println!("{}", span);
+            }
+        }
+        Commands::SubscribeStatus => {
+            let mut stream = index.subscribe_status().await;
+
+            while let Some(spans) = stream.next().await {
+                println!("Indexed spans:");
+                for span in spans {
+                    println!("{}", span);
+                }
             }
         }
         Commands::SizeOnDisk => {
