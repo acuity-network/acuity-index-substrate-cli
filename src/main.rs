@@ -182,8 +182,10 @@ async fn main() {
 
     match cli.command {
         Commands::Status => {
-            let status = index.status().await;
-            println!("{}", status);
+            let spans = index.status().await;
+            for span in spans {
+                println!("{}", span);
+            }
         }
         Commands::SizeOnDisk => {
             let size = index.size_on_disk().await;
