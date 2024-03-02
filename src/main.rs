@@ -1,3 +1,4 @@
+use anyhow::Result;
 use byte_unit::{Byte, UnitType};
 use clap::{Parser, Subcommand};
 use futures_util::StreamExt;
@@ -178,19 +179,19 @@ impl Into<Key> for KeyCommands {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<()> {
     let cli = Cli::parse();
-    let mut index = Index::connect(cli.url).await;
+    let mut index = Index::connect(cli.url).await?;
 
     match cli.command {
         Commands::Status => {
-            let spans = index.status().await;
+            let spans = index.status().await?;
             for span in spans {
                 println!("{}", span);
             }
         }
         Commands::SubscribeStatus => {
-            let mut stream = index.subscribe_status().await;
+            let mut stream = index.subscribe_status().await?;
             loop {
                 tokio::select! {
                     biased;
@@ -201,7 +202,7 @@ async fn main() {
                     }
                     Some(spans) = stream.next() => {
                         println!("Indexed spans:");
-                        for span in spans {
+                        for span in spans? {
                             println!("{}", span);
                         }
                     }
@@ -209,11 +210,11 @@ async fn main() {
             }
 
             println!("unsubscribing");
-            index.unsubscribe_status().await;
+            index.unsubscribe_status().await?;
             println!("unsubscribed");
         }
         Commands::SizeOnDisk => {
-            let size = index.size_on_disk().await;
+            let size = index.size_on_disk().await?;
             println!(
                 "Size on disk: {}",
                 Byte::from_u64(size).get_appropriate_unit(UnitType::Binary)
@@ -224,14 +225,14 @@ async fn main() {
             println!("Variants: {:?}", variants);
         }
         Commands::GetEvents { command } => {
-            let events = index.get_events(command.into()).await;
+            let events = index.get_events(command.into()).await?;
             for event in events {
                 println!("{}", event);
             }
         }
         Commands::SubscribeEvents { command } => {
             let key: Key = command.into();
-            let mut event_stream = index.subscribe_events(key.clone()).await;
+            let mut event_stream = index.subscribe_events(key.clone()).await?;
             loop {
                 tokio::select! {
                     biased;
@@ -241,7 +242,7 @@ async fn main() {
                         break;
                     }
                     Some(events) = event_stream.next() => {
-                        for event in events {
+                        for event in events? {
                             println!("{}", event);
                         }
                     }
@@ -249,8 +250,10 @@ async fn main() {
             }
 
             println!("unsubscribing");
-            index.unsubscribe_events(key).await;
+            index.unsubscribe_events(key).await?;
             println!("unsubscribed");
         }
-    }
+    };
+
+    Ok(())
 }
