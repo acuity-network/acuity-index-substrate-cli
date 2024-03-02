@@ -217,13 +217,27 @@ async fn main() {
             }
         }
         Commands::SubscribeEvents { command } => {
-            let mut event_stream = index.subscribe_events(command.into()).await;
+            let key: Key = command.into();
+            let mut event_stream = index.subscribe_events(key.clone()).await;
+            loop {
+                tokio::select! {
+                    biased;
 
-            while let Some(events) = event_stream.next().await {
-                for event in events {
-                    println!("{}", event);
+                    _ = tokio::signal::ctrl_c() => {
+                        drop (event_stream);
+                        break;
+                    }
+                    Some(events) = event_stream.next() => {
+                        for event in events {
+                            println!("{}", event);
+                        }
+                    }
                 }
             }
+
+            println!("unsubscribing");
+            index.unsubscribe_events(key).await;
+            println!("unsubscribed");
         }
     }
 }
