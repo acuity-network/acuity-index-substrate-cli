@@ -191,13 +191,26 @@ async fn main() {
         }
         Commands::SubscribeStatus => {
             let mut stream = index.subscribe_status().await;
+            loop {
+                tokio::select! {
+                    biased;
 
-            while let Some(spans) = stream.next().await {
-                println!("Indexed spans:");
-                for span in spans {
-                    println!("{}", span);
+                    _ = tokio::signal::ctrl_c() => {
+                        drop(stream);
+                        break;
+                    }
+                    Some(spans) = stream.next() => {
+                        println!("Indexed spans:");
+                        for span in spans {
+                            println!("{}", span);
+                        }
+                    }
                 }
             }
+
+            println!("unsubscribing");
+            index.unsubscribe_status().await;
+            println!("unsubscribed");
         }
         Commands::SizeOnDisk => {
             let size = index.size_on_disk().await;
@@ -224,7 +237,7 @@ async fn main() {
                     biased;
 
                     _ = tokio::signal::ctrl_c() => {
-                        drop (event_stream);
+                        drop(event_stream);
                         break;
                     }
                     Some(events) = event_stream.next() => {
