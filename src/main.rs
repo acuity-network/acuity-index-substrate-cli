@@ -4,7 +4,6 @@ use clap::{Parser, Subcommand};
 use futures_util::StreamExt;
 use hybrid_api::{Bytes32, Index, Key, SubstrateKey};
 use std::convert::Into;
-use std::str::FromStr;
 use subxt::utils::AccountId32;
 
 #[derive(Parser, Debug)]
@@ -46,7 +45,7 @@ enum KeyCommands {
     AccountId {
         /// Key to search for
         #[arg(short, long)]
-        key: String,
+        key: AccountId32,
     },
     /// AccountIndex
     AccountIndex {
@@ -135,8 +134,7 @@ impl Into<Key> for KeyCommands {
     fn into(self) -> Key {
         match self {
             KeyCommands::AccountId { key } => {
-                let account_id = AccountId32::from_str(&key).unwrap();
-                Key::Substrate(SubstrateKey::AccountId(Bytes32(account_id.0)))
+                Key::Substrate(SubstrateKey::AccountId(Bytes32(key.0)))
             }
             KeyCommands::AccountIndex { key } => Key::Substrate(SubstrateKey::AccountIndex(key)),
             KeyCommands::BountyIndex { key } => Key::Substrate(SubstrateKey::BountyIndex(key)),
