@@ -3,7 +3,6 @@ use byte_unit::{Byte, UnitType};
 use clap::{Parser, Subcommand};
 use futures_util::StreamExt;
 use hybrid_api::{Bytes32, Index, Key, SubstrateKey};
-use std::convert::Into;
 use subxt::utils::AccountId32;
 
 #[derive(Parser, Debug)]
@@ -69,7 +68,7 @@ enum KeyCommands {
     MessageId {
         /// Key to search for
         #[arg(short, long)]
-        key: String,
+        key: Bytes32,
     },
     /// PoolId
     PoolId {
@@ -81,13 +80,13 @@ enum KeyCommands {
     PreimageHash {
         /// Key to search for
         #[arg(short, long)]
-        key: String,
+        key: Bytes32,
     },
     /// ProposalHash
     ProposalHash {
         /// Key to search for
         #[arg(short, long)]
-        key: String,
+        key: Bytes32,
     },
     /// ProposalIndex
     ProposalIndex {
@@ -117,7 +116,7 @@ enum KeyCommands {
     TipHash {
         /// Key to search for
         #[arg(short, long)]
-        key: String,
+        key: Bytes32,
     },
     /// Variant
     Variant {
@@ -139,35 +138,17 @@ impl Into<Key> for KeyCommands {
             KeyCommands::AccountIndex { key } => Key::Substrate(SubstrateKey::AccountIndex(key)),
             KeyCommands::BountyIndex { key } => Key::Substrate(SubstrateKey::BountyIndex(key)),
             KeyCommands::EraIndex { key } => Key::Substrate(SubstrateKey::EraIndex(key)),
-            KeyCommands::MessageId { key } => {
-                let message_id = hex::decode(key).unwrap();
-                Key::Substrate(SubstrateKey::MessageId(Bytes32(
-                    message_id.try_into().unwrap(),
-                )))
-            }
+            KeyCommands::MessageId { key } => Key::Substrate(SubstrateKey::MessageId(key)),
             KeyCommands::PoolId { key } => Key::Substrate(SubstrateKey::PoolId(key)),
-            KeyCommands::PreimageHash { key } => {
-                let preimage_hash = hex::decode(key).unwrap();
-                Key::Substrate(SubstrateKey::PreimageHash(Bytes32(
-                    preimage_hash.try_into().unwrap(),
-                )))
-            }
-            KeyCommands::ProposalHash { key } => {
-                let proposal_hash = hex::decode(key).unwrap();
-                Key::Substrate(SubstrateKey::ProposalHash(Bytes32(
-                    proposal_hash.try_into().unwrap(),
-                )))
-            }
+            KeyCommands::PreimageHash { key } => Key::Substrate(SubstrateKey::PreimageHash(key)),
+            KeyCommands::ProposalHash { key } => Key::Substrate(SubstrateKey::ProposalHash(key)),
             KeyCommands::ProposalIndex { key } => Key::Substrate(SubstrateKey::ProposalIndex(key)),
             KeyCommands::RefIndex { key } => Key::Substrate(SubstrateKey::RefIndex(key)),
             KeyCommands::RegistrarIndex { key } => {
                 Key::Substrate(SubstrateKey::RegistrarIndex(key))
             }
             KeyCommands::SessionIndex { key } => Key::Substrate(SubstrateKey::SessionIndex(key)),
-            KeyCommands::TipHash { key } => {
-                let tip_hash = hex::decode(key).unwrap();
-                Key::Substrate(SubstrateKey::TipHash(Bytes32(tip_hash.try_into().unwrap())))
-            }
+            KeyCommands::TipHash { key } => Key::Substrate(SubstrateKey::TipHash(key)),
             KeyCommands::Variant {
                 pallet_id,
                 variant_id,
