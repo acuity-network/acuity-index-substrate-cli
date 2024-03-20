@@ -1,6 +1,6 @@
 [package]
 name = "hybrid-cli"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 description = "A command line utility for querying Hybrid indexes."
 homepage = "https://hybridscan.app/"
@@ -19,4 +19,4 @@ subxt = "0.34.0"
 futures-util = "0.3.30"
 hex = "0.4.3"
 anyhow = "1.0.80"
-hybrid-api = "0.1.2"
+hybrid-api = "0.1.3"
