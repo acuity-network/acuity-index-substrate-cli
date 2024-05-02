@@ -1,14 +1,14 @@
 [package]
-name = "hybrid-cli"
-version = "0.1.3"
+name = "acuity-index-substrate-cli"
+version = "0.2.0"
 edition = "2021"
-description = "A command line utility for querying Hybrid indexes."
-homepage = "https://hybridscan.app/"
-repository = "https://github.com/hybrid-explorer/hybrid-cli"
+description = "A command line utility for querying index nodes built with Acuity Index Substrate."
+homepage = "https://index.acuity.network/"
+repository = "https://github.com/acuity-network/acuity-index-substrate-cli"
 license = "Apache-2.0"
 
 [[bin]]
-name = "hybrid"
+name = "ais"
 path = "src/main.rs"
 
 [dependencies]
@@ -19,4 +19,4 @@ subxt = "0.34.0"
 futures-util = "0.3.30"
 hex = "0.4.3"
 anyhow = "1.0.80"
-hybrid-api = "0.1.3"
+acuity-index-substrate-api = "0.2.0"

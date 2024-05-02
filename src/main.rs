@@ -1,14 +1,14 @@
+use acuity_index_substrate_api::{Bytes32, Index, Key, SubstrateKey};
 use anyhow::Result;
 use byte_unit::{Byte, UnitType};
 use clap::{Parser, Subcommand};
 use futures_util::StreamExt;
-use hybrid_api::{Bytes32, Index, Key, SubstrateKey};
 use subxt::utils::AccountId32;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 pub struct Cli {
-    /// URL of Substrate node to connect to
+    /// URL of Acuity Substrate Index node to connect to
     #[arg(short, long)]
     pub url: String,
 
