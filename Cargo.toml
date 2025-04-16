@@ -1,7 +1,7 @@
 [package]
 name = "acuity-index-substrate-cli"
 version = "0.2.0"
-edition = "2021"
+edition = "2024"
 description = "A command line utility for querying index nodes built with Acuity Index Substrate."
 homepage = "https://index.acuity.network/"
 repository = "https://github.com/acuity-network/acuity-index-substrate-cli"
