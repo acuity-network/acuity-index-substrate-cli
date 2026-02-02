@@ -1,6 +1,6 @@
 [package]
 name = "acuity-index-substrate-cli"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
 description = "A command line utility for querying index nodes built with Acuity Index Substrate."
 homepage = "https://index.acuity.network/"
@@ -15,8 +15,8 @@ path = "src/main.rs"
 clap = { version = "4.5.1", features = ["derive"] }
 tokio = { version = "1", features = ["full"] }
 byte-unit = "5.1.4"
-subxt = "0.34.0"
+subxt = "0.42"
 futures-util = "0.3.30"
 hex = "0.4.3"
 anyhow = "1.0.80"
-acuity-index-substrate-api = "0.2.0"
+acuity-index-substrate-api = "0.3.0"
